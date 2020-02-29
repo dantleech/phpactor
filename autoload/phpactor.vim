@@ -10,8 +10,11 @@
 " NOTE: This help is auto-generated from the VimScript using
 "     https://github.com/google/vimdoc. See
 "     https://phpactor.github.io/phpactor/developing.html#vim-help
+" vint: -ProhibitUnnecessaryDoubleQuote
+" vint: -ProhibitImplicitScopeVariable
+" vint: -ProhibitAbbreviationOption
 
-function! phpactor#Update()
+function! phpactor#Update() abort
     let current = getcwd()
     execute 'cd ' . g:phpactorpath
     echo system('git checkout ' . g:phpactorBranch)
@@ -20,7 +23,7 @@ function! phpactor#Update()
     execute 'cd ' .  current
 endfunction
 
-function! phpactor#Complete(findstart, base)
+function! phpactor#Complete(findstart, base) abort
 
     let lineOffset = line2byte(line("."))
 
@@ -73,7 +76,7 @@ function! phpactor#Complete(findstart, base)
     return completions
 endfunction
 
-function! phpactor#_completeTruncateLabel(label, length)
+function! phpactor#_completeTruncateLabel(label, length) abort
     if strlen(a:label) < a:length
         return a:label
     endif
@@ -81,11 +84,11 @@ function! phpactor#_completeTruncateLabel(label, length)
     return strpart(a:label, 0, a:length - 3) . '...'
 endfunction
 
-function! phpactor#_completionItemHash(completion)
+function! phpactor#_completionItemHash(completion) abort
     return a:completion['word'] . a:completion['menu'] . a:completion['kind']
 endfunction
 
-function! phpactor#_completeImportClass(completedItem)
+function! phpactor#_completeImportClass(completedItem) abort
 
     if !has_key(a:completedItem, "word")
         return
@@ -110,17 +113,17 @@ function! phpactor#_completeImportClass(completedItem)
 
 endfunction
 
-function! phpactor#ExtractMethod(...)
+function! phpactor#ExtractMethod(...) abort
     let positions = {}
 
-    if 0 == a:0 " Visual mode - backward compatibility
+    if 0 ==# a:0 " Visual mode - backward compatibility
         let positions.start = phpactor#_selectionStart()
         let positions.end = phpactor#_selectionEnd()
     elseif a:1 ==? 'v' " Visual mode
         let positions.start = phpactor#_selectionStart()
         let positions.end = phpactor#_selectionEnd()
     else " Linewise or characterwise motion
-        let linewise = 'line' == a:1
+        let linewise = 'line' ==# a:1
 
         let positions.start = s:getStartOffsetFromMark("'[", linewise)
         let positions.end = s:getEndOffsetFromMark("']", linewise)
@@ -129,20 +132,20 @@ function! phpactor#ExtractMethod(...)
     call phpactor#rpc("extract_method", { "path": phpactor#_path(), "offset_start": positions.start, "offset_end": positions.end, "source": phpactor#_source()})
 endfunction
 
-function! phpactor#ExtractExpression(type)
+function! phpactor#ExtractExpression(type) abort
     let positions = {}
 
-    if v:true == a:type  " Invoked from Visual mode - backward compatibility
+    if v:true ==# a:type  " Invoked from Visual mode - backward compatibility
         let positions.start = phpactor#_selectionStart()
         let positions.end = phpactor#_selectionEnd()
-    elseif v:false == a:type " Invoked from an offset - backward compatibility
+    elseif v:false ==# a:type " Invoked from an offset - backward compatibility
         let positions.start = phpactor#_offset()
         let positions.end = v:null
     elseif a:type ==? 'v' " Visual mode
         let positions.start = phpactor#_selectionStart()
         let positions.end = phpactor#_selectionEnd()
     else " Linewise or characterwise motion
-        let linewise = 'line' == a:type
+        let linewise = 'line' ==# a:type
 
         let positions.start = s:getStartOffsetFromMark("'[", linewise)
         let positions.end = s:getEndOffsetFromMark("']", linewise)
@@ -151,11 +154,11 @@ function! phpactor#ExtractExpression(type)
     call phpactor#rpc("extract_expression", { "path": phpactor#_path(), "offset_start": positions.start, "offset_end": positions.end, "source": phpactor#_source()})
 endfunction
 
-function! phpactor#ExtractConstant()
+function! phpactor#ExtractConstant() abort
     call phpactor#rpc("extract_constant", { "offset": phpactor#_offset(), "source": phpactor#_source(), "path": phpactor#_path()})
 endfunction
 
-function! phpactor#ClassExpand()
+function! phpactor#ClassExpand() abort
     let word = expand("<cword>")
     let classInfo = phpactor#rpc("class_search", { "short_name": word })
 
@@ -171,17 +174,17 @@ function! phpactor#ClassExpand()
     execute "normal! ciw" . namespace_prefix.word
 endfunction
 
-function! phpactor#UseAdd()
+function! phpactor#UseAdd() abort
     call phpactor#ImportClass()
 endfunction
-function! phpactor#ImportClass()
+function! phpactor#ImportClass() abort
     call phpactor#rpc("import_class", {"offset": phpactor#_offset(), "source": phpactor#_source(), "path": expand('%:p')})
 endfunction
-function! phpactor#ImportMissingClasses()
+function! phpactor#ImportMissingClasses() abort
     call phpactor#rpc("import_missing_classes", {"source": phpactor#_source(), "path": expand('%:p')})
 endfunction
 
-function! phpactor#_GotoDefinitionTarget(target)
+function! phpactor#_GotoDefinitionTarget(target) abort
     call phpactor#rpc("goto_definition", {
                 \"offset": phpactor#_offset(),
                 \"source": phpactor#_source(),
@@ -189,10 +192,10 @@ function! phpactor#_GotoDefinitionTarget(target)
                 \"target": a:target,
                 \'language': &ft})
 endfunction
-function! phpactor#GotoDefinition()
+function! phpactor#GotoDefinition() abort
     call phpactor#_GotoDefinitionTarget('focused_window')
 endfunction
-function! phpactor#GotoImplementations()
+function! phpactor#GotoImplementations() abort
     call phpactor#rpc("goto_implementation", {
                 \"offset": phpactor#_offset(),
                 \"source": phpactor#_source(),
@@ -200,41 +203,41 @@ function! phpactor#GotoImplementations()
                 \"target": 'focused_window',
                 \'language': &ft})
 endfunction
-function! phpactor#GotoDefinitionVsplit()
+function! phpactor#GotoDefinitionVsplit() abort
     call phpactor#_GotoDefinitionTarget('vsplit')
 endfunction
-function! phpactor#GotoDefinitionHsplit()
+function! phpactor#GotoDefinitionHsplit() abort
     call phpactor#_GotoDefinitionTarget('hsplit')
 endfunction
-function! phpactor#GotoDefinitionTab()
+function! phpactor#GotoDefinitionTab() abort
     call phpactor#_GotoDefinitionTarget('new_tab')
 endfunction
 
-function! phpactor#Hover()
+function! phpactor#Hover() abort
     call phpactor#rpc("hover", { "offset": phpactor#_offset(), "source": phpactor#_source() })
 endfunction
 
-function! phpactor#ContextMenu()
+function! phpactor#ContextMenu() abort
     call phpactor#rpc("context_menu", { "offset": phpactor#_offset(), "source": phpactor#_source(), "current_path": expand('%:p') })
 endfunction
 
-function! phpactor#CopyFile()
+function! phpactor#CopyFile() abort
     call phpactor#rpc("copy_class", { "source_path": phpactor#_path() })
 endfunction
 
-function! phpactor#MoveFile()
+function! phpactor#MoveFile() abort
     call phpactor#rpc("move_class", { "source_path": phpactor#_path() })
 endfunction
 
-function! phpactor#OffsetTypeInfo()
+function! phpactor#OffsetTypeInfo() abort
     call phpactor#rpc("offset_info", { "offset": phpactor#_offset(), "source": phpactor#_source()})
 endfunction
 
-function! phpactor#ExtensionList()
+function! phpactor#ExtensionList() abort
     call phpactor#rpc("extension_list", {})
 endfunction
 
-function! phpactor#ExtensionInstall(...)
+function! phpactor#ExtensionInstall(...) abort
     if v:false != get(a:,1, v:false)
         call phpactor#rpc("extension_install", {"extension_name":get(a:,1)})
         return
@@ -242,7 +245,7 @@ function! phpactor#ExtensionInstall(...)
     call phpactor#rpc("extension_install", {})
 endfunction
 
-function! phpactor#ExtensionRemove(...)
+function! phpactor#ExtensionRemove(...) abort
     if v:false != get(a:,1, v:false)
         call phpactor#rpc("extension_remove", {"extension_name":get(a:,1)})
         return
@@ -250,121 +253,121 @@ function! phpactor#ExtensionRemove(...)
     call phpactor#rpc("extension_remove", {})
 endfunction
 
-function! phpactor#Transform(...)
+function! phpactor#Transform(...) abort
     let transform = get(a:, 1, '')
 
     let args = { "path": phpactor#_path(), "source": phpactor#_source() }
 
-    if transform != ''
+    if transform !=# ''
         let args.transform = transform
     endif
 
     call phpactor#rpc("transform", args)
 endfunction
 
-function! phpactor#ClassNew()
+function! phpactor#ClassNew() abort
     call phpactor#rpc("class_new", { "current_path": phpactor#_path() })
 endfunction
 
-function! phpactor#ClassInflect()
+function! phpactor#ClassInflect() abort
     call phpactor#rpc("class_inflect", { "current_path": phpactor#_path() })
 endfunction
 
 " Deprecated!! Use FindReferences
-function! phpactor#ClassReferences()
+function! phpactor#ClassReferences() abort
     call phpactor#FindReferences()
 endfunction
 
-function! phpactor#FindReferences()
+function! phpactor#FindReferences() abort
     call phpactor#rpc("references", { "offset": phpactor#_offset(), "source": phpactor#_source(), "path": phpactor#_path()})
 endfunction
 
-function! phpactor#Navigate()
+function! phpactor#Navigate() abort
     call phpactor#rpc("navigate", { "source_path": phpactor#_path() })
 endfunction
 
-function! phpactor#CacheClear()
+function! phpactor#CacheClear() abort
     call phpactor#rpc("cache_clear", {})
 endfunction
 
-function! phpactor#Status()
+function! phpactor#Status() abort
     call phpactor#rpc("status", {})
 endfunction
 
-function! phpactor#Config()
+function! phpactor#Config() abort
     call phpactor#rpc("config", {})
 endfunction
 
-function! phpactor#GetNamespace()
+function! phpactor#GetNamespace() abort
     let fileInfo = phpactor#rpc("file_info", { "path": phpactor#_path() })
 
     return fileInfo['class_namespace']
 endfunction
 
-function! phpactor#GetClassFullName()
+function! phpactor#GetClassFullName() abort
     let fileInfo = phpactor#rpc("file_info", { "path": phpactor#_path() })
 
     return fileInfo['class']
 endfunction
 
-function! phpactor#ChangeVisibility()
+function! phpactor#ChangeVisibility() abort
     call phpactor#rpc("change_visibility", { "offset": phpactor#_offset(), "source": phpactor#_source(), "path": expand('%:p') })
 endfunction
 
-function! phpactor#GenerateAccessors()
+function! phpactor#GenerateAccessors() abort
     call phpactor#rpc("generate_accessor", { "source": phpactor#_source(), "path": expand('%:p'), 'offset': phpactor#_offset() })
 endfunction
 
 """""""""""""""""""""""
 " Utility functions
 """""""""""""""""""""""
-function! s:isOpenInCurrentWindow(filePath)
-  return expand('%:p') == a:filePath
+function! s:isOpenInCurrentWindow(filePath) abort
+  return expand('%:p') ==# a:filePath
 endfunction
 
-function! phpactor#_switchToBufferOrEdit(filePath)
+function! phpactor#_switchToBufferOrEdit(filePath) abort
     if s:isOpenInCurrentWindow(a:filePath)
         return v:false
     endif
 
     let bufferNumber = bufnr(a:filePath . '$')
 
-    let command = (bufferNumber == -1)
+    let command = (bufferNumber ==# -1)
           \ ? ":edit " . a:filePath
           \ : ":buffer " . bufferNumber
 
     exec command
 endfunction
 
-function! phpactor#_offset()
+function! phpactor#_offset() abort
     return line2byte(line('.')) + col('.') - 1
 endfunction
 
-function! phpactor#_source()
+function! phpactor#_source() abort
     return join(getline(1,'$'), "\n")
 endfunction
 
-function! phpactor#_path()
+function! phpactor#_path() abort
     return expand('%:p')
 endfunction
 
-function! s:getStartOffsetFromMark(mark, linewise)
+function! s:getStartOffsetFromMark(mark, linewise) abort
     let [line, column] = getpos(a:mark)[1:2]
     let offset = line2byte(line)
 
-    if v:true == a:linewise
+    if v:true ==# a:linewise
         return offset - 1
     endif
 
     return offset + column - 2
 endfunction
 
-function! s:getEndOffsetFromMark(mark, linewise)
+function! s:getEndOffsetFromMark(mark, linewise) abort
     let [line, column] = getpos(a:mark)[1:2]
     let offset = line2byte(line)
     let lineLenght = strlen(getline(line))
 
-    if v:true == a:linewise
+    if v:true ==# a:linewise
         return offset + lineLenght - 1
     endif
 
@@ -376,15 +379,15 @@ function! s:getEndOffsetFromMark(mark, linewise)
     return offset + column - 1
 endfunction
 
-function! phpactor#_selectionStart()
+function! phpactor#_selectionStart() abort
     return s:getStartOffsetFromMark("'<", v:false)
 endfunction
 
-function! phpactor#_selectionEnd()
+function! phpactor#_selectionEnd() abort
     return s:getEndOffsetFromMark("'>", v:false)
 endfunction
 
-function! phpactor#_applyTextEdits(path, edits)
+function! phpactor#_applyTextEdits(path, edits) abort
     call phpactor#_switchToBufferOrEdit(a:path)
 
     let postCursorPosition = getpos('.')
@@ -410,7 +413,7 @@ function! phpactor#_applyTextEdits(path, edits)
             endif
         endif
 
-        let newLines = edit.text == "\n" ? [''] : split(edit.text, "\n")
+        let newLines = edit.text ==# "\n" ? [''] : split(edit.text, "\n")
         keepjumps call append(startLine, newLines)
 
         if startLine < curLine
@@ -427,7 +430,7 @@ endfunction
 " RPC -->-->-->-->-->--
 """""""""""""""""""""""
 
-function! phpactor#rpc(action, arguments)
+function! phpactor#rpc(action, arguments) abort
     " Remove any existing output in the message window
     execute ':redraw'
 
@@ -436,7 +439,7 @@ function! phpactor#rpc(action, arguments)
     let cmd = g:phpactorPhpBin . ' ' . g:phpactorbinpath . ' rpc --working-dir=' . g:phpactorInitialCwd
     let result = system(cmd, json_encode(request))
 
-    if (v:shell_error == 0)
+    if (v:shell_error ==# 0)
         try
             let response = json_decode(result)
         catch
@@ -457,15 +460,15 @@ function! phpactor#rpc(action, arguments)
     endif
 endfunction
 
-function! phpactor#_rpc_dispatch(actionName, parameters)
+function! phpactor#_rpc_dispatch(actionName, parameters) abort
 
     " >> return_choice
-    if a:actionName == "return"
+    if a:actionName ==# "return"
         return a:parameters["value"]
     endif
 
     " >> return_choice
-    if a:actionName == "return_choice"
+    if a:actionName ==# "return_choice"
         let list = []
         let c = 1
         for choice in a:parameters["choices"]
@@ -475,7 +478,7 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
 
         let choice = inputlist(list)
 
-        if (choice == 0)
+        if (choice ==# 0)
             return
         endif
 
@@ -485,19 +488,19 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     endif
 
     " >> echo
-    if a:actionName == "echo"
+    if a:actionName ==# "echo"
         echo a:parameters["message"]
         return
     endif
 
     " >> error
-    if a:actionName == "error"
+    if a:actionName ==# "error"
         echo "Error from Phpactor: " . a:parameters["message"]
         return
     endif
 
     " >> collection
-    if a:actionName == "collection"
+    if a:actionName ==# "collection"
         for action in a:parameters["actions"]
             let result = phpactor#_rpc_dispatch(action["name"], action["parameters"])
 
@@ -510,7 +513,7 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     endif
 
     " >> open_file
-    if a:actionName == "open_file"
+    if a:actionName ==# "open_file"
         let changedFileOrWindow = v:true
 
         call s:openFileInSelectedTarget(
@@ -520,7 +523,7 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
               \ a:parameters["force_reload"]
               \ )
 
-        if a:parameters["target"] == 'focused_window'
+        if a:parameters["target"] ==# 'focused_window'
             let changedFileOrWindow = !s:isOpenInCurrentWindow(a:parameters["path"])
         endif
 
@@ -534,10 +537,10 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     endif
 
     " >> close_file
-    if a:actionName == "close_file"
+    if a:actionName ==# "close_file"
         let bufferNumber = bufnr(a:parameters['path']. '$')
 
-        if (bufferNumber == -1)
+        if (bufferNumber ==# -1)
             return
         endif
 
@@ -546,10 +549,10 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     endif
 
     " >> file references
-    if a:actionName == "file_references"
+    if a:actionName ==# "file_references"
         " if there is only one file, and it is the open file, don't
         " bother opening the quick fix window
-        if len(a:parameters['file_references']) == 1
+        if len(a:parameters['file_references']) ==# 1
             let fileRefs = a:parameters['file_references'][0]
             if -1 != match(fileRefs['file'], bufname('%') . '$')
                 return
@@ -574,7 +577,7 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     endif
 
     " >> input_callback
-    if a:actionName == "input_callback"
+    if a:actionName ==# "input_callback"
         let inputs = a:parameters['inputs']
         let action = a:parameters['callback']['action']
         let parameters = a:parameters['callback']['parameters']
@@ -589,7 +592,7 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     endif
 
     " >> information
-    if a:actionName == "information"
+    if a:actionName ==# "information"
         " We write to a temporary file and then "edit" it in the preview
         " window. Not sure if there is a better way to do this.
         let temp = resolve(tempname())
@@ -610,13 +613,13 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     "       offset is not taken into account, so same-line edits will cause an
     "       incorrect post-edit cursor character offset.
     "
-    if a:actionName == "update_file_source"
+    if a:actionName ==# "update_file_source"
         call phpactor#_applyTextEdits(a:parameters['path'], a:parameters['edits'])
         return
     endif
 
     " >> replace_file_source
-    if a:actionName == "replace_file_source"
+    if a:actionName ==# "replace_file_source"
 
         " if the file is open in a buffer, reload it before replacing it's
         " source (avoid file-modified-on-disk errors)
@@ -646,9 +649,9 @@ function! phpactor#_rpc_dispatch(actionName, parameters)
     throw "Do not know how to handle action '" . a:actionName . "'"
 endfunction
 
-function! s:openFileInSelectedTarget(filePath, target, useOpenWindow, forceReload)
+function! s:openFileInSelectedTarget(filePath, target, useOpenWindow, forceReload) abort
     let bufferNumber = bufnr(a:filePath . "$")
-    if v:true == a:useOpenWindow && -1 != bufferNumber
+    if v:true ==# a:useOpenWindow && -1 != bufferNumber
         let firstWindowId = get(win_findbuf(bufferNumber), 0, v:null)
 
         if v:null != firstWindowId
@@ -657,37 +660,37 @@ function! s:openFileInSelectedTarget(filePath, target, useOpenWindow, forceReloa
         endif
     endif
 
-    if a:target == 'focused_window'
+    if a:target ==# 'focused_window'
         call phpactor#_switchToBufferOrEdit(a:filePath)
-        if v:true == a:forceReload
+        if v:true ==# a:forceReload
           exec "e!"
         endif
         return
     endif
 
-    if a:target == 'vsplit'
+    if a:target ==# 'vsplit'
         exec ":vsplit " . a:filePath
         return
     endif
 
-    if a:target == 'hsplit'
+    if a:target ==# 'hsplit'
         exec ":split " . a:filePath
         return
     endif
 
-    if a:target == 'new_tab'
+    if a:target ==# 'new_tab'
         exec ":tabnew " . a:filePath
         return
     endif
 endfunction
 
-function! phpactor#_rpc_dispatch_input_handler(Next, parameters, parameterName, result)
+function! phpactor#_rpc_dispatch_input_handler(Next, parameters, parameterName, result) abort
     let a:parameters[a:parameterName] = a:result
 
     call a:Next(a:parameters)
 endfunction
 
-function! phpactor#_rpc_dispatch_input(inputs, action, parameters)
+function! phpactor#_rpc_dispatch_input(inputs, action, parameters) abort
     let input = remove(a:inputs, 0)
     let inputParameters = input['parameters']
 
@@ -704,25 +707,25 @@ function! phpactor#_rpc_dispatch_input(inputs, action, parameters)
     " Remove any existing output in the message window
     execute ':redraw'
 
-    if 'text' == input['type']
+    if 'text' ==# input['type']
         let TypeHandler = function('phpactor#input#text', [
             \ inputParameters['label'],
             \ inputParameters['default'],
             \ inputParameters['type']
         \ ])
-    elseif 'choice' == input['type']
+    elseif 'choice' ==# input['type']
         let TypeHandler = function('phpactor#input#choice', [
             \ inputParameters['label'],
             \ inputParameters['choices'],
             \ inputParameters['keyMap']
         \ ])
-    elseif 'list' == input['type']
+    elseif 'list' ==# input['type']
         let TypeHandler = function('phpactor#input#list', [
             \ inputParameters['label'],
             \ inputParameters['choices'],
             \ inputParameters['multi']
         \ ])
-    elseif 'confirm' == input['type']
+    elseif 'confirm' ==# input['type']
         let TypeHandler = function('phpactor#input#confirm', [
             \ inputParameters['label']
         \ ])
