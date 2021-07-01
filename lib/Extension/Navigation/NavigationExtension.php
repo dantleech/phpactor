@@ -44,9 +44,12 @@ class NavigationExtension implements Extension
     private function registerPathFinder(ContainerBuilder $container): void
     {
         $container->register(self::SERVICE_PATH_FINDER, function (Container $container) {
-            return PathFinder::fromDestinations($container->getParameter(self::PATH_FINDER_DESTINATIONS));
+            return PathFinder::fromAbsoluteDestinations(
+                $container->getParameter('file_path_resolver.project_root'),
+                $container->getParameter(self::PATH_FINDER_DESTINATIONS
+            ));
         });
-        
+
         $container->register('application.navigator', function (Container $container) {
             return new Navigator(
                 $container->get('navigation.navigator.chain'),
